@@ -348,8 +348,8 @@ function createSandboxedBashOps(shellPath?: string): BashOperations {
         throw new Error(`Working directory does not exist: ${cwd}`);
       }
 
-      const wrappedCommand = await SandboxManager.wrapWithSandbox(command);
       const { shell, args } = getShellConfig(shellPath);
+      const wrappedCommand = await SandboxManager.wrapWithSandbox(command, shell);
 
       return new Promise((resolve, reject) => {
         const child = spawn(shell, [...args, wrappedCommand], {
