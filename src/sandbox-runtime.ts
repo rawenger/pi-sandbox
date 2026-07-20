@@ -5,7 +5,7 @@ import {
   SandboxManager,
   type SandboxAskCallback,
   type SandboxRuntimeConfig,
-} from "@carderne/sandbox-runtime";
+} from "@anthropic-ai/sandbox-runtime";
 import { settings } from "@oh-my-pi/pi-coding-agent";
 import { type BashOperations } from "@oh-my-pi/pi-coding-agent/extensibility/legacy-pi-coding-agent-shim";
 
@@ -41,7 +41,6 @@ export function buildRuntimeConfig(
     },
     ignoreViolations: config.ignoreViolations,
     enableWeakerNestedSandbox: config.enableWeakerNestedSandbox,
-    allowBrowserProcess: config.allowBrowserProcess,
     enableWeakerNetworkIsolation: true,
   };
 }

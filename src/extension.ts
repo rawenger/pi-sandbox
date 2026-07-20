@@ -1,4 +1,4 @@
-import { SandboxManager } from "@carderne/sandbox-runtime";
+import { SandboxManager } from "@anthropic-ai/sandbox-runtime";
 import { type AgentToolResult, type ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
 import { isToolCallEventType } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/types";
 import { createBashToolDefinition } from "@oh-my-pi/pi-coding-agent/extensibility/legacy-pi-coding-agent-shim";

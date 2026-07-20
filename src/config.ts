@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
-import { type SandboxRuntimeConfig } from "@carderne/sandbox-runtime";
+import { type SandboxRuntimeConfig } from "@anthropic-ai/sandbox-runtime";
 import { getAgentDir } from "@oh-my-pi/pi-coding-agent";
 
 export interface SandboxConfig extends SandboxRuntimeConfig {
@@ -43,9 +43,6 @@ export function deepMerge(base: SandboxConfig, overrides: Partial<SandboxConfig>
   if (overrides.ignoreViolations) result.ignoreViolations = overrides.ignoreViolations;
   if (overrides.enableWeakerNestedSandbox !== undefined) {
     result.enableWeakerNestedSandbox = overrides.enableWeakerNestedSandbox;
-  }
-  if (overrides.allowBrowserProcess !== undefined) {
-    result.allowBrowserProcess = overrides.allowBrowserProcess;
   }
 
   return result;
