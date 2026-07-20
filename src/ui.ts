@@ -1,5 +1,5 @@
-import { type ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { Key, matchesKey, truncateToWidth } from "@earendil-works/pi-tui";
+import { type ExtensionContext } from "@oh-my-pi/pi-coding-agent";
+import { Key, matchesKey, truncateToWidth } from "@oh-my-pi/pi-tui";
 
 import { type SandboxConfig } from "./config.ts";
 import { allowsAllDomains } from "./policy.ts";
@@ -23,14 +23,14 @@ const PERMISSION_OPTIONS: PromptOption[] = [
     key: "P",
     action: "project",
     confirm: true,
-    hint: "→ .pi/sandbox.json",
+    hint: "→ .omp/sandbox.json",
   },
   {
     label: "Allow for all projects",
     key: "A",
     action: "global",
     confirm: true,
-    hint: "→ ~/.pi/agent/sandbox.json",
+    hint: "→ ~/.omp/agent/sandbox.json",
   },
 ];
 

@@ -1,8 +1,8 @@
 # pi-sandbox
 
-Sandbox for [pi](https://pi.dev/).
+Sandbox for [Oh My Pi (omp)](https://github.com/oh-my-pi/oh-my-pi).
 
-Sandboxes pi like this:
+Sandboxes omp like this:
 - read/write/edit: direct control using allow/deny lists
 - bash: uses [`@carderne/sandbox-runtime`](https://www.npmjs.com/package/@carderne/sandbox-runtime) to control network and file system access
 
@@ -29,7 +29,7 @@ which is forked from Anthropic's
 [`anthropic-experimental/sandbox-runtime`](https://github.com/anthropic-experimental/sandbox-runtime).
 The sandbox runtime checks for [`ripgrep`](https://github.com/BurntSushi/ripgrep) (the
 `rg` binary) on **both macOS and Linux** at sandbox-init time. If `rg`
-is not on the `PATH` that pi was launched with, sandbox initialization
+is not on the `PATH` that omp was launched with, sandbox initialization
 fails with:
 
 ```
@@ -47,8 +47,8 @@ Install ripgrep before enabling the extension:
 | Linux (Arch) | `sudo pacman -S ripgrep` |
 | From source / other | <https://github.com/BurntSushi/ripgrep#installation> |
 
-If `which rg` succeeds in your shell but pi still reports `rg not
-found`, pi is being launched from a parent process whose `PATH` does
+If `which rg` succeeds in your shell but omp still reports `rg not
+found`, omp is being launched from a parent process whose `PATH` does
 not include the directory containing `rg` (common when GUI launchers
 inherit a minimal non-login `PATH`). On macOS, `/opt/homebrew/bin` and
 `/usr/local/bin` are the usual culprits — make sure your launcher's
@@ -56,11 +56,16 @@ environment includes whichever one your install uses.
 
 #### Install
 ```bash
-pi install npm:pi-sandbox
+omp plugin link .
+```
+
+Or install from npm once published:
+```bash
+omp plugin install npm:pi-sandbox
 ```
 
 #### Configure
-Add a config like this either to `~/.pi/agent/sandbox.json` (global) or to `.pi/sandbox.json` (local).
+Add a config like this either to `~/.omp/agent/sandbox.json` (global) or to `.omp/sandbox.json` (local).
 Local config takes precedence over global.
 
 Note below that the order of precedence for filesystem read and write are opposite.
@@ -95,7 +100,7 @@ Note below that the order of precedence for filesystem read and write are opposi
 #### Usage
 
 ```
-pi --no-sandbox          disable sandboxing for the session
+omp --no-sandbox         disable sandboxing for the session
 /sandbox                 show current configuration and session allowances
 ```
 
@@ -113,12 +118,12 @@ When a block is triggered, a prompt appears with four options:
 
 - Abort (keep blocked)
 - Allow for this session only
-- Allow for this project — written to `.pi/sandbox.json`
-- Allow for all projects — written to `~/.pi/agent/sandbox.json`
+- Allow for this project — written to `.omp/sandbox.json`
+- Allow for all projects — written to `~/.omp/agent/sandbox.json`
 
 **Session allowances** are held in memory only. They are never written to disk
 and the agent has no way to read or modify them. They are reset when the
-extension reloads or pi restarts.
+extension reloads or omp restarts.
 
 ### What is prompted vs. hard-blocked
 

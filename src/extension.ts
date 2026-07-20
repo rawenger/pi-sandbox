@@ -1,10 +1,7 @@
 import { SandboxManager } from "@carderne/sandbox-runtime";
-import { type AgentToolResult, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import {
-  createBashToolDefinition,
-  isToolCallEventType,
-  SettingsManager,
-} from "@earendil-works/pi-coding-agent";
+import { type AgentToolResult, type ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
+import { isToolCallEventType } from "@oh-my-pi/pi-coding-agent/extensibility/extensions/types";
+import { createBashToolDefinition } from "@oh-my-pi/pi-coding-agent/extensibility/legacy-pi-coding-agent-shim";
 
 import {
   addDomainToConfig,
@@ -25,6 +22,7 @@ import {
   extractBlockedWritePath,
   initializeSandbox,
   reinitializeSandbox,
+  runSandboxedUserBash,
   type SessionAllowances,
   supportsNodeEnvProxy,
 } from "./sandbox-runtime.ts";
@@ -46,8 +44,7 @@ export default function (pi: ExtensionAPI) {
   });
 
   const localCwd = process.cwd();
-  const userShellPath = SettingsManager.create(localCwd).getShellPath();
-  const localBash = createBashToolDefinition(localCwd, { shellPath: userShellPath });
+  const localBash = createBashToolDefinition(localCwd);
 
   let sandboxEnabled = false;
   let sandboxInitialized = false;
@@ -144,8 +141,7 @@ export default function (pi: ExtensionAPI) {
           return localBash.execute(id, params, signal, onUpdate, ctx);
         }
         return createBashToolDefinition(localCwd, {
-          operations: createSandboxedBashOps(userShellPath),
-          shellPath: userShellPath,
+          operations: createSandboxedBashOps(),
         }).execute(id, params, signal, onUpdate, ctx);
       };
 
@@ -212,19 +208,24 @@ export default function (pi: ExtensionAPI) {
       if (!domainIsAllowed(domain, effectiveDomains(ctx.cwd))) {
         const choice = await promptDomainBlock(ctx, domain);
         if (choice === "abort") {
+          const output = `Blocked: "${domain}" is not in allowedDomains. Use /sandbox to review your config.`;
           return {
             result: {
-              output: `Blocked: "${domain}" is not in allowedDomains. Use /sandbox to review your config.`,
+              output,
               exitCode: 1,
               cancelled: false,
               truncated: false,
+              totalLines: 1,
+              totalBytes: Buffer.byteLength(output, "utf-8"),
+              outputLines: 1,
+              outputBytes: Buffer.byteLength(output, "utf-8"),
             },
           };
         }
         await applyChoice(choice, "domain", domain, ctx.cwd);
       }
     }
-    return { operations: createSandboxedBashOps(userShellPath) };
+    return { result: await runSandboxedUserBash(event.command, event.cwd) };
   });
 
   pi.on("tool_call", async (event, ctx) => {

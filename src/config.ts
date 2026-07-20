@@ -1,9 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
 import { type SandboxRuntimeConfig } from "@carderne/sandbox-runtime";
-import { getAgentDir } from "@earendil-works/pi-coding-agent";
+import { getAgentDir } from "@oh-my-pi/pi-coding-agent";
 
 export interface SandboxConfig extends SandboxRuntimeConfig {
   enabled?: boolean;
@@ -64,16 +63,15 @@ function readJsonConfig(configPath: string, warn: boolean): Partial<SandboxConfi
 
 export function getConfigPaths(cwd: string): { globalPath: string; projectPath: string } {
   return {
-    globalPath: join(homedir(), ".pi", "agent", "sandbox.json"),
-    projectPath: join(cwd, ".pi", "sandbox.json"),
+    globalPath: join(getAgentDir(), "sandbox.json"),
+    projectPath: join(cwd, ".omp", "sandbox.json"),
   };
 }
 
 export function loadConfig(cwd: string): SandboxConfig {
-  const projectConfigPath = join(cwd, ".pi", "sandbox.json");
-  const globalConfigPath = join(getAgentDir(), "sandbox.json");
-  const globalConfig = readJsonConfig(globalConfigPath, true);
-  const projectConfig = readJsonConfig(projectConfigPath, true);
+  const { globalPath, projectPath } = getConfigPaths(cwd);
+  const globalConfig = readJsonConfig(globalPath, true);
+  const projectConfig = readJsonConfig(projectPath, true);
   return deepMerge(deepMerge(DEFAULT_CONFIG, globalConfig), projectConfig);
 }
 

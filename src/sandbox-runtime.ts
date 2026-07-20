@@ -6,7 +6,8 @@ import {
   type SandboxAskCallback,
   type SandboxRuntimeConfig,
 } from "@carderne/sandbox-runtime";
-import { type BashOperations, getShellConfig } from "@earendil-works/pi-coding-agent";
+import { settings } from "@oh-my-pi/pi-coding-agent";
+import { type BashOperations } from "@oh-my-pi/pi-coding-agent/extensibility/legacy-pi-coding-agent-shim";
 
 import { type SandboxConfig } from "./config.ts";
 import { domainIsAllowed } from "./policy.ts";
@@ -76,12 +77,11 @@ export function extractBlockedWritePath(output: string): string | null {
   return match ? match[1] : null;
 }
 
-export function createSandboxedBashOps(shellPath?: string): BashOperations {
+export function createSandboxedBashOps(): BashOperations {
   return {
     async exec(command, cwd, { onData, signal, timeout, env }) {
       if (!existsSync(cwd)) throw new Error(`Working directory does not exist: ${cwd}`);
-
-      const { shell, args } = getShellConfig(shellPath);
+      const { shell, args } = settings.getShellConfig();
       const wrappedCommand = await SandboxManager.wrapWithSandbox(command, shell);
 
       return new Promise((resolve, reject) => {
@@ -130,5 +130,52 @@ export function createSandboxedBashOps(shellPath?: string): BashOperations {
         });
       });
     },
+  };
+}
+
+export interface UserBashResult {
+  output: string;
+  exitCode: number | undefined;
+  cancelled: boolean;
+  timedOut?: boolean;
+  truncated: boolean;
+  totalLines: number;
+  totalBytes: number;
+  outputLines: number;
+  outputBytes: number;
+}
+
+export async function runSandboxedUserBash(command: string, cwd: string): Promise<UserBashResult> {
+  const chunks: Buffer[] = [];
+  const ops = createSandboxedBashOps();
+  let cancelled = false;
+  let timedOut = false;
+  let exitCode: number | undefined;
+  try {
+    const result = await ops.exec(command, cwd, {
+      onData: (data) => chunks.push(Buffer.from(data)),
+      env: settings.getShellConfig().env,
+    });
+    exitCode = result.exitCode ?? undefined;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (message === "aborted") cancelled = true;
+    else if (message.startsWith("timeout:")) timedOut = true;
+    else throw error;
+    exitCode = undefined;
+  }
+  const output = Buffer.concat(chunks).toString("utf-8");
+  const totalBytes = Buffer.byteLength(output, "utf-8");
+  const totalLines = output.length === 0 ? 0 : output.split("\n").length;
+  return {
+    output,
+    exitCode,
+    cancelled,
+    timedOut,
+    truncated: false,
+    totalLines,
+    totalBytes,
+    outputLines: totalLines,
+    outputBytes: totalBytes,
   };
 }

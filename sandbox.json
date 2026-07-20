@@ -34,7 +34,7 @@
     "allowWrite": [
       ".",
       "/tmp",
-      "~/.pi/",
+      "~/.omp/",
       "~/.cache/uv",
       "~/.rustup",
       "~/.agent-browser",
