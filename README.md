@@ -9,15 +9,6 @@ Sandboxes omp like this:
 When a blocked action is attempted, the user is
 prompted to allow it temporarily or permanently rather than silently failing.
 
-![demo](./demo/demo.gif)
-
-## Notes
-There is an example config at [sandbox.json](./sandbox.json). It was quite a few things added to get this extension to work with [agent-browser](https://agent-browser.dev/) and other common tools.
-
-These open significant security loopholes, so shouldn't be used in a sensitive context or when you don't need browser support.
-
-You may need to trial and error to find additional things you need to allow.
-
 ## Quickstart
 
 #### Prerequisites
