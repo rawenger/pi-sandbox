@@ -6,7 +6,7 @@ import {
   type SandboxAskCallback,
   type SandboxRuntimeConfig,
 } from "@anthropic-ai/sandbox-runtime";
-import { settings } from "@oh-my-pi/pi-coding-agent";
+import { Settings, settings } from "@oh-my-pi/pi-coding-agent";
 import { type BashOperations } from "@oh-my-pi/pi-coding-agent/extensibility/legacy-pi-coding-agent-shim";
 
 import { type SandboxConfig } from "./config.ts";
@@ -80,6 +80,10 @@ export function createSandboxedBashOps(): BashOperations {
   return {
     async exec(command, cwd, { onData, signal, timeout, env }) {
       if (!existsSync(cwd)) throw new Error(`Working directory does not exist: ${cwd}`);
+      // The sandbox extension runs under its own vendored @oh-my-pi/pi-coding-agent
+      // copy whose global Settings singleton is never initialized (see pi-sandbox-d5m).
+      // getShellConfig() throws "Settings not initialized" without this idempotent init.
+      await Settings.init({ cwd });
       const { shell, args } = settings.getShellConfig();
       const wrappedCommand = await SandboxManager.wrapWithSandbox(command, shell);
 
@@ -147,6 +151,9 @@ export interface UserBashResult {
 export async function runSandboxedUserBash(command: string, cwd: string): Promise<UserBashResult> {
   const chunks: Buffer[] = [];
   const ops = createSandboxedBashOps();
+  // Idempotent; guarantees the vendored Settings singleton is loaded before the
+  // getShellConfig() call below (see pi-sandbox-d5m).
+  await Settings.init({ cwd });
   let cancelled = false;
   let timedOut = false;
   let exitCode: number | undefined;
